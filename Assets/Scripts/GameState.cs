@@ -4,8 +4,8 @@ using UnityEngine;
 using System;
 public class GameState
 {
-    private int[] _scoreBoard;
-    private bool _turn;
+    private int[] _scoreBoard = new int[2];
+    private bool _turn = true;
 
 
     public event Action<int[]> OnScoreBoardChanged;

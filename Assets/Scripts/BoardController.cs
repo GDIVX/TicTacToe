@@ -23,6 +23,14 @@ public class BoardController : MonoBehaviour
 
         board.SetSymbol(position.x, position.y, symbol);
         OnSetSymbol?.Invoke(position, symbol);
+
+        GameManager.Instance.NextTurn();
+    }
+
+    public void SetSymbolForCurrentPlayer(Vector2Int position)
+    {
+        Symobl symbol = GameManager.Instance.GetCurrentTurn() ? Symobl.X : Symobl.O;
+        SetSymbol(position, symbol);
     }
 
     internal Symobl GetSymbol(Vector2Int cell)
@@ -33,5 +41,19 @@ public class BoardController : MonoBehaviour
     internal Symobl GetSymbol(int x, int y)
     {
         return board.GetSymbol(x, y);
+    }
+
+    internal void ResetBoard()
+    {
+
+        for (int x = 0; x < 3; x++)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                board.SetSymbol(x, y, Symobl.EMPTY);
+                OnSetSymbol?.Invoke(new(x, y), Symobl.EMPTY);
+
+            }
+        }
     }
 }

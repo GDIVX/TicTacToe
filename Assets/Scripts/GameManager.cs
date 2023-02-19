@@ -6,20 +6,30 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     //singlton
-    public static GameManager instance;
+    public static GameManager Instance;
 
+
+    public event Action<int> PlayerWin;
 
     #region SERVICES
     [SerializeField] BoardController board;
     GameState gameState = new();
 
+    public GameState GameState
+    {
+        get => gameState; private set
+        {
+            gameState = value;
+        }
+    }
+
     #endregion
 
     void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
         }
         else
         {
@@ -34,6 +44,12 @@ public class GameManager : MonoBehaviour
 
     private void CheckIfGameWon(Vector2Int cell, Symobl symobl)
     {
+        //if the symbol is empty return
+        if (symobl == Symobl.EMPTY)
+        {
+            return;
+        }
+
         if (CheckIfWon(symobl))
         {
             if (symobl == Symobl.X)
@@ -45,10 +61,38 @@ public class GameManager : MonoBehaviour
                 OnPlayerWin(1);
             }
         }
+
+
+        if (CheckIfDraw())
+        {
+            OnPlayerWin(2);
+        }
+    }
+
+    private bool CheckIfDraw()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (board.GetSymbol(i, j) == Symobl.EMPTY)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private bool CheckIfWon(Symobl player)
     {
+        //if the symbol is empty return
+        if (player == Symobl.EMPTY)
+        {
+            return false;
+        }
+
         // Check rows
         for (int i = 0; i < 3; i++)
         {
@@ -84,13 +128,22 @@ public class GameManager : MonoBehaviour
 
     public void NextTurn()
     {
-        gameState.Turn = !gameState.Turn;
+        GameState.Turn = !GameState.Turn;
     }
 
     public void OnPlayerWin(int playerIndex)
     {
-        int currentScore = gameState.GetScore(playerIndex);
-        gameState.SetScore(currentScore++, playerIndex);
+
+
+        int currentScore = GameState.GetScore(playerIndex);
+        GameState.SetScore(currentScore + 1, playerIndex);
+        PlayerWin?.Invoke(playerIndex);
+
+    }
+
+    public bool GetCurrentTurn()
+    {
+        return GameState.Turn;
     }
 
     #endregion
@@ -100,13 +153,22 @@ public class GameManager : MonoBehaviour
 
     public void Subscribe_OnScoreBoardChanged(Action<int[]> action)
     {
-        gameState.OnScoreBoardChanged += action;
+        GameState.OnScoreBoardChanged += action;
     }
 
     public void Subscribe_OnTurnChanged(Action<bool> action)
     {
-        gameState.OnTurnChanged += action;
+        GameState.OnTurnChanged += action;
+    }
+
+    internal void ResetGame()
+    {
+        board.ResetBoard();
+        //set the turn to X
+        GameState.Turn = true;
     }
 
     #endregion
 }
+
+

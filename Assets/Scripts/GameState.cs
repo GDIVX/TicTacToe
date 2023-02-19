@@ -5,19 +5,19 @@ using System;
 public class GameState
 {
     private int[] _scoreBoard = new int[2];
-    private bool _turn = true;
+    private bool _isXTurn = true;
 
 
     public event Action<int[]> OnScoreBoardChanged;
     public event Action<bool> OnTurnChanged;
-    public bool Turn
+    public bool IsXTurn
     {
-        get => _turn;
+        get => _isXTurn;
 
         set
         {
-            _turn = value;
-            OnTurnChanged?.Invoke(_turn);
+            _isXTurn = value;
+            OnTurnChanged?.Invoke(_isXTurn);
         }
     }
 
@@ -34,5 +34,10 @@ public class GameState
         _scoreBoard[index] = score;
 
         OnScoreBoardChanged?.Invoke(_scoreBoard);
+    }
+
+    internal void SetTurn(bool isX)
+    {
+        _isXTurn = isX;
     }
 }

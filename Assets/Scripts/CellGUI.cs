@@ -13,6 +13,7 @@ public class CellGUI : MonoBehaviour
 
     internal void SetSprite(Sprite sprite)
     {
+        Debug.Log($"Set sprite {sprite} {Position}");
         _spriteRenderer.sprite = sprite;
     }
 

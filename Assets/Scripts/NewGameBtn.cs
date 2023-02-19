@@ -22,7 +22,7 @@ public class NewGameBtn : MonoBehaviour
         {
             0 => "X WON",
             1 => "O WON",
-            _ => throw new System.NotImplementedException(),
+            _ => "DRAW"
         };
 
         gameObject.SetActive(true);

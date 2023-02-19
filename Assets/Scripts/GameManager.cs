@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public BoardController Board => board;
+
     #endregion
 
     void Awake()
@@ -37,10 +39,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
+
+    public void OnPlayerWin(int playerIndex)
     {
-        board.OnSetSymbol += CheckIfGameWon;
+
+        int currentScore = GameState.GetScore(playerIndex);
+        GameState.SetScore(currentScore + 1, playerIndex);
+        PlayerWin?.Invoke(playerIndex);
+
     }
+
+    #region VICTORY_CONDITIONS
 
     private void CheckIfGameWon(Vector2Int cell, Symobl symobl)
     {
@@ -75,7 +84,7 @@ public class GameManager : MonoBehaviour
         {
             for (int j = 0; j < 3; j++)
             {
-                if (board.GetSymbol(i, j) == Symobl.EMPTY)
+                if (Board.GetSymbol(i, j) == Symobl.EMPTY)
                 {
                     return false;
                 }
@@ -96,7 +105,7 @@ public class GameManager : MonoBehaviour
         // Check rows
         for (int i = 0; i < 3; i++)
         {
-            if (board.GetSymbol(i, 0) == player && board.GetSymbol(i, 1) == player && board.GetSymbol(i, 2) == player)
+            if (Board.GetSymbol(i, 0) == player && Board.GetSymbol(i, 1) == player && Board.GetSymbol(i, 2) == player)
             {
                 return true;
             }
@@ -105,70 +114,71 @@ public class GameManager : MonoBehaviour
         // Check columns
         for (int j = 0; j < 3; j++)
         {
-            if (board.GetSymbol(0, j) == player && board.GetSymbol(1, j) == player && board.GetSymbol(2, j) == player)
+            if (Board.GetSymbol(0, j) == player && Board.GetSymbol(1, j) == player && Board.GetSymbol(2, j) == player)
             {
                 return true;
             }
         }
 
         // Check diagonals
-        if (board.GetSymbol(0, 0) == player && board.GetSymbol(1, 1) == player && board.GetSymbol(2, 2) == player)
+        if (Board.GetSymbol(0, 0) == player && Board.GetSymbol(1, 1) == player && Board.GetSymbol(2, 2) == player)
         {
             return true;
         }
-        if (board.GetSymbol(2, 0) == player && board.GetSymbol(1, 1) == player && board.GetSymbol(0, 2) == player)
+        if (Board.GetSymbol(2, 0) == player && Board.GetSymbol(1, 1) == player && Board.GetSymbol(0, 2) == player)
         {
             return true;
         }
 
         return false;
     }
+    #endregion
 
     #region GAME_STATE
 
     public void NextTurn()
     {
-        GameState.Turn = !GameState.Turn;
+        GameState.IsXTurn = !GameState.IsXTurn;
     }
 
-    public void OnPlayerWin(int playerIndex)
-    {
-
-
-        int currentScore = GameState.GetScore(playerIndex);
-        GameState.SetScore(currentScore + 1, playerIndex);
-        PlayerWin?.Invoke(playerIndex);
-
-    }
 
     public bool GetCurrentTurn()
     {
-        return GameState.Turn;
+        return GameState.IsXTurn;
     }
-
-    #endregion
-
-
-    #region GAME_STATE_EVENTS
-
-    public void Subscribe_OnScoreBoardChanged(Action<int[]> action)
-    {
-        GameState.OnScoreBoardChanged += action;
-    }
-
-    public void Subscribe_OnTurnChanged(Action<bool> action)
-    {
-        GameState.OnTurnChanged += action;
-    }
-
     internal void ResetGame()
     {
-        board.ResetBoard();
+        Board.ResetBoard();
         //set the turn to X
-        GameState.Turn = true;
+        GameState.IsXTurn = true;
+    }
+
+    void SaveGameState(Vector2Int lastMove, Symobl symbol)
+    {
+
+        Command command = new(symbol == Symobl.X, lastMove);
+    }
+
+    public void Undo()
+    {
+        Command.Undo();
+    }
+
+    public void Redo()
+    {
+        Command.Redo();
+    }
+
+    internal void OnSetSymbol(Vector2Int position, Symobl symbol)
+    {
+        CheckIfGameWon(position, symbol);
+        SaveGameState(position, symbol);
+
     }
 
     #endregion
+
+
 }
 
 

@@ -25,6 +25,20 @@ public class BoardController : MonoBehaviour
         OnSetSymbol?.Invoke(position, symbol);
 
         GameManager.Instance.NextTurn();
+        GameManager.Instance.OnSetSymbol(position, symbol);
+    }
+
+    /// <summary>
+    /// Set the symbol without changing the turn or checking for legal moves
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="symbol"></param>
+    public void OverideSymbol(Vector2Int position, Symobl symbol)
+    {
+        board.SetSymbol(position.x, position.y, symbol);
+        OnSetSymbol?.Invoke(position, symbol);
+
+
     }
 
     public void SetSymbolForCurrentPlayer(Vector2Int position)
